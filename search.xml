@@ -1132,6 +1132,36 @@
 
 <p>成功，拿下flag</p>
 <h2 id="吐槽环节"><a href="#吐槽环节" class="headerlink" title="吐槽环节"></a>吐槽环节</h2><p>可以看到从2019年3月6号开始所有访问过的IP都被记录了，作者有点暴露个人信息了</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>渗透思路很重要</p>
+]]></content>
+      <categories>
+        <category>CTF-Bugku(旧版)-WEB</category>
+      </categories>
+      <tags>
+        <tag>CTF-WEB</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>求getshell</title>
+    <url>/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%82getshell/</url>
+    <content><![CDATA[<h2 id="开卷看题"><a href="#开卷看题" class="headerlink" title="开卷看题"></a>开卷看题</h2><img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%82getshell/1.png" class="">
+
+<p>看这标题，猖狂至极，无法容忍</p>
+<a id="more"></a>
+
+<h2 id="开始进攻"><a href="#开始进攻" class="headerlink" title="开始进攻"></a>开始进攻</h2><p>首先伪装成良民，上传几个文件试试</p>
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%82getshell/2.png" class="">
+
+<p>发现只要是合法的后缀都会被统一命名为xxx.jpg，可以说基本无法绕过</p>
+<h2 id="寻求外援"><a href="#寻求外援" class="headerlink" title="寻求外援"></a>寻求外援</h2><p>既然自己知识有限，那就靠万能的Internet吧，果然在我的一番搜索之下发现了解决办法</p>
+<p>首先来学习一下：<a href="https://www.cnblogs.com/0yst3r-2046/p/10980420.html" alt="" target="_blank">传送门</a></p>
+<p>原来的资料找不到了，简要说明一下吧</p>
+<p>Content-Type(HTTP header)制定了POST数据的编码方式，同时也指明了与后台的协作方式，不过有一个缺陷就是名称必须完全相同（即大小写敏感），所以修改任意字母即可绕过验证机制</p>
+<p>本题中我们先修改Content-Type(HTTP header)中的任意字母大小写，然后逐一尝试后缀</p>
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%82getshell/3.png" class="">
+
+<p>最终后缀为php5时得到flag</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>我个人觉得这道题出稍微有点瑕疵</p>
 ]]></content>
       <categories>
         <category>CTF-Bugku(旧版)-WEB</category>
