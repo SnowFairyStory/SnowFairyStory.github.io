@@ -1057,4 +1057,87 @@
         <tag>CTF-WEB</tag>
       </tags>
   </entry>
+  <entry>
+    <title>web8</title>
+    <url>/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/web8/</url>
+    <content><![CDATA[<h2 id="开卷看题"><a href="#开卷看题" class="headerlink" title="开卷看题"></a>开卷看题</h2><img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/web8/1.png" class="">
+
+<p>给了一段提示：txt？？？？</p>
+<a id="more"></a>
+
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/web8/2.png" class="">
+
+<p>代码审计题</p>
+<h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">// 重点：extract函数将键值数组转换为变量</span></span><br><span class="line">extract($_GET);</span><br><span class="line"></span><br><span class="line"><span class="comment">// $ac非空</span></span><br><span class="line"><span class="keyword">if</span> (!<span class="keyword">empty</span>($ac)) &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 将$fn文件内容拷贝给$f</span></span><br><span class="line">    $f = trim(file_get_contents($fn));</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 如果$ac值和$fn文件内容一致则输出flag</span></span><br><span class="line">    <span class="keyword">if</span> ($ac === $f) &#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">&quot;&lt;p&gt;This is flag:&quot;</span> . <span class="string">&quot; $flag&lt;/p&gt;&quot;</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">&quot;&lt;p&gt;sorry!&lt;/p&gt;&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>总结一下：经过extract函数解析后，如果$ac值和$fn文件内容一致则输出flag</p>
+<h2 id="开始探索"><a href="#开始探索" class="headerlink" title="开始探索"></a>开始探索</h2><p>现在问题是：我们怎么能确定文件内容呢？</p>
+<p>&emsp;&emsp;当时我（笨比）的想法是：找一个能确定内容的文件，于是灵光一闪，七窍接通，突然想到会不会存在其他的小文件，紧接着扫了一下目录。。。。</p>
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/web8/3.png" class="">
+
+<p>还真有(我可真是太机智了)，访问flag.txt</p>
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/web8/4.png" class="">
+
+<p>NICE啊，得到了具体的内容</p>
+<p>可以构造payload了：ac=flags&amp;fn=flag.txt</p>
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/web8/5.png" class="">
+
+<p>NICE啊，拿到了flag，不禁给自己鼓掌（当时膨胀的差点飞出宇宙）</p>
+<h2 id="后续发展"><a href="#后续发展" class="headerlink" title="后续发展"></a>后续发展</h2><p>&emsp;&emsp;感觉这次无比顺利之后便开始研究其他解决方案，突然想到，页面的源码应该就是index.php的，这不就是一个可以确定内容的吗</p>
+<p>于是乎，开始熟练地构造payload：ac=%3C%3F%70%68%70%0D%0A%65%78%74%72%61%63%74%28%24%5F%47%45%54%29%3B%0D%0A%69%66+%28%21%65%6D%70%74%79%28%24%61%63%29%29%0D%0A%7B%0D%0A%24%66+%3D+%74%72%69%6D%28%66%69%6C%65%5F%67%65%74%5F%63%6F%6E%74%65%6E%74%73%28%24%66%6E%29%29%3B%0D%0A%69%66+%28%24%61%63+%3D%3D%3D+%24%66%29%0D%0A%7B%0D%0A%65%63%68%6F+%22%3C%70%3E%54%68%69%73+%69%73+%66%6C%61%67%3A%22+%2E%22+%24%66%6C%61%67%3C%2F%70%3E%22%3B%0D%0A%7D%0D%0A%65%6C%73%65%0D%0A%7B%0D%0A%65%63%68%6F+%22%3C%70%3E%73%6F%72%72%79%21%3C%2F%70%3E%22%3B%0D%0A%7D%0D%0A%7D%0D%0A%3F%3E&amp;fn=index.php</p>
+<p>但是这次无论怎么搞也失败，没办法看看其他大佬的思路</p>
+<h2 id="惊世骇俗"><a href="#惊世骇俗" class="headerlink" title="惊世骇俗"></a>惊世骇俗</h2><p>不得不说我学过的都顺着呼吸离开了我的身体，瞻仰一下大佬的解决方案</p>
+<p>利用data协议直接构造任何数据，666</p>
+<p>data协议详细参考：<a href="https://www.cnblogs.com/liyongquan/p/8615928.html" alt="data协议" target="_blank">传送门</a></p>
+<p>懂了吧，所以payload可以写成：ac=xxx&amp;fn=data:,xxx</p>
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/web8/6.png" class="">
+
+<p>又快又方便，满分</p>
+<p>惊不惊喜，刺不刺激？</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>记得第一次看见data协议是在HTML中表示img，虽然很简单但是。。关键时候你就想不到</p>
+]]></content>
+      <categories>
+        <category>CTF-Bugku(旧版)-WEB</category>
+      </categories>
+      <tags>
+        <tag>CTF-WEB</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>细心</title>
+    <url>/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E7%BB%86%E5%BF%83/</url>
+    <content><![CDATA[<h2 id="开卷看题"><a href="#开卷看题" class="headerlink" title="开卷看题"></a>开卷看题</h2><img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E7%BB%86%E5%BF%83/1.png" class="">
+
+<p>看见细心二字我直接心细了（你品，领悟一下中华文化的魅力）</p>
+<p>同时提示了想办法搞到管理员权限</p>
+<a id="more"></a>
+
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E7%BB%86%E5%BF%83/2.png" class="">
+
+<p>主页直接404可还行</p>
+<h2 id="顺藤摸瓜"><a href="#顺藤摸瓜" class="headerlink" title="顺藤摸瓜"></a>顺藤摸瓜</h2><p>404肯定是骗人的，不信你看看</p>
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E7%BB%86%E5%BF%83/3.png" class="">
+
+<p>没啥思路，扫扫目录</p>
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E7%BB%86%E5%BF%83/4.png" class="">
+
+<p>存在robots.txt，访问一下</p>
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E7%BB%86%E5%BF%83/5.png" class="">
+
+<p>得到敏感文件：resusl.php，跟进访问</p>
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E7%BB%86%E5%BF%83/6.png" class="">
+
+<p>看代码提示我们需要GET一个密码进去，由于有管理员等字样，自然地想到了admin</p>
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E7%BB%86%E5%BF%83/7.png" class="">
+
+<p>成功，拿下flag</p>
+<h2 id="吐槽环节"><a href="#吐槽环节" class="headerlink" title="吐槽环节"></a>吐槽环节</h2><p>可以看到从2019年3月6号开始所有访问过的IP都被记录了，作者有点暴露个人信息了</p>
+]]></content>
+      <categories>
+        <category>CTF-Bugku(旧版)-WEB</category>
+      </categories>
+      <tags>
+        <tag>CTF-WEB</tag>
+      </tags>
+  </entry>
 </search>
