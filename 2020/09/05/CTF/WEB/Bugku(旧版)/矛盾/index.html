@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/nsah-32x32-next.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/nsah-16x16-next.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.nsah.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"flat"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="开卷看题  代码审计题">
+<meta property="og:type" content="article">
+<meta property="og:title" content="矛盾">
+<meta property="og:url" content="https://blog.nsah.top/2020/09/05/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E7%9F%9B%E7%9B%BE/index.html">
+<meta property="og:site_name" content="Snowの博客">
+<meta property="og:description" content="开卷看题  代码审计题">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog.nsah.top/2020/09/05/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E7%9F%9B%E7%9B%BE/1.png">
+<meta property="og:image" content="https://blog.nsah.top/2020/09/05/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E7%9F%9B%E7%9B%BE/2.png">
+<meta property="og:image" content="https://blog.nsah.top/2020/09/05/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E7%9F%9B%E7%9B%BE/3.png">
+<meta property="og:image" content="https://blog.nsah.top/2020/09/05/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E7%9F%9B%E7%9B%BE/4.png">
+<meta property="article:published_time" content="2020-09-05T05:33:52.000Z">
+<meta property="article:modified_time" content="2020-09-07T01:32:44.335Z">
+<meta property="article:author" content="Snow-NSAH">
+<meta property="article:tag" content="CTF-WEB">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog.nsah.top/2020/09/05/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E7%9F%9B%E7%9B%BE/1.png">
+
+<link rel="canonical" href="https://blog.nsah.top/2020/09/05/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E7%9F%9B%E7%9B%BE/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>矛盾 | Snowの博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Snowの博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">渗透小白</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">1</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">1</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">27</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://blog.nsah.top/2020/09/05/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E7%9F%9B%E7%9B%BE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/nsah.gif">
+      <meta itemprop="name" content="Snow-NSAH">
+      <meta itemprop="description" content="精益求精, 永无止境">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Snowの博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          矛盾
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020/09/05 13:33:52" itemprop="dateCreated datePublished" datetime="2020-09-05T13:33:52+08:00">2020/09/05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020/09/07 09:32:44" itemprop="dateModified" datetime="2020-09-07T09:32:44+08:00">2020/09/07</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CTF-Bugku-%E6%97%A7%E7%89%88-WEB/" itemprop="url" rel="index"><span itemprop="name">CTF-Bugku(旧版)-WEB</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="开卷看题"><a href="#开卷看题" class="headerlink" title="开卷看题"></a>开卷看题</h2><img src="/2020/09/05/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E7%9F%9B%E7%9B%BE/1.png" class="">
+
+<p>代码审计题</p>
+<a id="more"></a>
+
+<h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$num=$_GET[<span class="string">&#x27;num&#x27;</span>]; <span class="comment">// 从GET参数中提取num</span></span><br><span class="line"><span class="keyword">if</span>(!is_numeric($num)) <span class="comment">// 如果num不是一个数字</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">echo</span> $num; <span class="comment">// 输出num的值</span></span><br><span class="line">    <span class="keyword">if</span>($num==<span class="number">1</span>) <span class="comment">// 如果num值弱等于1则输出flag</span></span><br><span class="line">    	<span class="keyword">echo</span> <span class="string">&#x27;flag&#123;**********&#125;&#x27;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>总结：提交一个名为num的GET参数，如果他不是一个数字但是值又弱等于1则输出flag</p>
+<p>行吧，终于明白标题的含义了</p>
+<h2 id="探索真相"><a href="#探索真相" class="headerlink" title="探索真相"></a>探索真相</h2><p>本题中能有暗箱操作的地方只有is_numeric函数和弱等于了</p>
+<p>先看看is_numeric函数：函数用于检测变量是否为数字或数字字符串</p>
+<p>详细说明参考：<a href="https://www.php.net/manual/zh/function.is-numeric.php " alt="官方" target="_blank">PHP官方</a>，<a href="https://www.runoob.com/php/php-is_numeric-function.html " alt="菜鸟教程" target="_blank">菜鸟教程</a></p>
+<p>也就是说只要字符串中存在非数字字符即返回false</p>
+<br>
+
+<p>那么现在的问题就变成了如何在数字字符串中中包含非数字字符，嗯……………….</p>
+<p>有了，科学计数法中用e表示10，可能有戏</p>
+<p>不清楚的同学先看看这个：<a href="https://baike.baidu.com/item/%E7%A7%91%E5%AD%A6%E8%AE%B0%E6%95%B0%E6%B3%95/1612882?fromtitle=%E7%A7%91%E5%AD%A6%E8%AE%A1%E6%95%B0%E6%B3%95&fromid=756685&fr=aladdin" alt="科学计数法" target="_blank">科学计数法</a>，<a href="https://www.jianshu.com/p/697d3aa68ad3" alt="PHP科学计数法" target="">PHP科学计数法</a></p>
+<p>由于任何数的零次幂都为1，所以我们可以使用<strong>1e0</strong>表示1</p>
+<h2 id="第一次尝试"><a href="#第一次尝试" class="headerlink" title="第一次尝试"></a>第一次尝试</h2><img src="/2020/09/05/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E7%9F%9B%E7%9B%BE/2.png" class="">
+
+<p>嗯？？为什么不行，这脸打得啪啪的</p>
+<p>而且是完全不行，连第一道关卡都没过得去</p>
+<h2 id="深刻反思"><a href="#深刻反思" class="headerlink" title="深刻反思"></a>深刻反思</h2><p>科学计数法应该没问题啊。为什么会出现这种情况</p>
+<p>既然自己不行事，找找别人的参考一下下</p>
+<p>翻遍了WP，发现都是说的科学计数法，但是和我想的有一个明显的区别：</p>
+<p>别人的payload：1*e*0.1</p>
+<p>我的payload：1e0</p>
+<p>这就很奇怪了，首先他这表达式就不是科学计数法，其次科学计数法幂数哪来的小数？？？？？</p>
+<p>先试试人家的吧，康康情况</p>
+<img src="/2020/09/05/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E7%9F%9B%E7%9B%BE/3.png" class="">
+
+<p>这？？？不会吧，好歹我高考数学也是60分的</p>
+<p>为什么？？？？？？？？？？？？？？？</p>
+<h2 id="绝不认输"><a href="#绝不认输" class="headerlink" title="绝不认输"></a>绝不认输</h2><p>即便他人的答案是正确的，但是我绝对不相信这是用了科学计数法</p>
+<p>开始疯狂尝试payload：</p>
+<ul>
+<li>1e0.1 </li>
+<li>1e0.</li>
+<li>1e</li>
+<li>1+</li>
+<li>………..</li>
+</ul>
+<p>&emsp;&emsp;我发现，好像只要在1后面存在非数字字符就可以，这时候我突然想到会不会是在数值转换的过程存在不可告人的秘密呢？</p>
+<p>查阅一下资料：<a href="https://www.cnblogs.com/lwbqqyumidi/archive/2013/01/31/2887086.html" alt="PHP数字和字符串比较" target="_blank">PHP数字和字符串比较</a></p>
+<p>总结一下，当字符串和数字进行比较时，系统自动从前到后截取连续的数字字符</p>
+<p>&emsp;&emsp;所以为什么他们的payload可以成功？因为<strong> * </strong>号在隐式转换中截断了后续字符所以最终表达式值为1而不是他们以为的科学计数法立的功</p>
+<p>&emsp;&emsp;那么为什么1e0不能成功，因为科学计数法也是可以转换为数字的(本来就是数字的表达式)，所以你写一个合法的自然就over了，当payload为1e0.1时，由于表达式不是合法的科学计数法，所以从e处截断了，最终为1</p>
+<br>
+
+<p>最终payload的一种方案为：1加上任意非数字字符即可</p>
+<img src="/2020/09/05/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E7%9F%9B%E7%9B%BE/4.png" class="">
+
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><ul>
+<li>善于参考借鉴但是不可盲目相信</li>
+<li>一定一定一定要自己多尝试一下，弄懂原理</li>
+<li>发现问题一定要尝试，找出原因</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Snow-NSAH
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://blog.nsah.top/2020/09/05/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E7%9F%9B%E7%9B%BE/" title="矛盾">https://blog.nsah.top/2020/09/05/CTF/WEB/Bugku(旧版)/矛盾/</a>
+  </li>
+    <li class="post-copyright-license">
+    <strong>反馈建议：</strong>
+    限于作者水平, 博文肯定有不足甚至错误之处, 欢迎发送邮件提供您的宝贵建议
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/CTF-WEB/" rel="tag"># CTF-WEB</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/09/04/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/web%E5%9F%BA%E7%A1%80$_POST/" rel="prev" title="web基础$_POST">
+      <i class="fa fa-chevron-left"></i> web基础$_POST
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/09/05/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/web3/" rel="next" title="web3">
+      web3 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%8D%B7%E7%9C%8B%E9%A2%98"><span class="nav-number">1.</span> <span class="nav-text">开卷看题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">代码分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A2%E7%B4%A2%E7%9C%9F%E7%9B%B8"><span class="nav-number">3.</span> <span class="nav-text">探索真相</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AC%A1%E5%B0%9D%E8%AF%95"><span class="nav-number">4.</span> <span class="nav-text">第一次尝试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%B1%E5%88%BB%E5%8F%8D%E6%80%9D"><span class="nav-number">5.</span> <span class="nav-text">深刻反思</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%9D%E4%B8%8D%E8%AE%A4%E8%BE%93"><span class="nav-number">6.</span> <span class="nav-text">绝不认输</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8E%E8%AE%B0"><span class="nav-number">7.</span> <span class="nav-text">后记</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Snow-NSAH"
+      src="/images/nsah.gif">
+  <p class="site-author-name" itemprop="name">Snow-NSAH</p>
+  <div class="site-description" itemprop="description">精益求精, 永无止境</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="mailto:2562950632@qq.com" title="E-Mail → mailto:2562950632@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=2562950632" title="QQ → tencent:&#x2F;&#x2F;AddContact&#x2F;?fromId&#x3D;45&amp;fromSubId&#x3D;1&amp;subcmd&#x3D;all&amp;uin&#x3D;2562950632" rel="noopener" target="_blank"><i class="fab fa-qq fa-fw"></i>QQ</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://nsah.top/" title="https:&#x2F;&#x2F;nsah.top" rel="noopener" target="_blank">主站(开发中)</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://bbs.nsah.top/" title="https:&#x2F;&#x2F;bbs.nsah.top" rel="noopener" target="_blank">论坛(建设中)</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://sunian.top/" title="https:&#x2F;&#x2F;sunian.top" rel="noopener" target="_blank">素念博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://zer0-knows.github.io/" title="https:&#x2F;&#x2F;zer0-knows.github.io" rel="noopener" target="_blank">零识博客</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Snow-NSAH</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+  <!-- 页面点击小红心 -->
+  <script src="/js/clicklove.js"></script>
+</body>
+</html>
