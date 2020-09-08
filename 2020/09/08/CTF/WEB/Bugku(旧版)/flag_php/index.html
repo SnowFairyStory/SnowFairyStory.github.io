@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/nsah-32x32-next.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/nsah-16x16-next.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.nsah.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"flat"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="开卷看题  题干很重要，先记一记">
+<meta property="og:type" content="article">
+<meta property="og:title" content="flag.php">
+<meta property="og:url" content="https://blog.nsah.top/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/index.html">
+<meta property="og:site_name" content="Snowの博客">
+<meta property="og:description" content="开卷看题  题干很重要，先记一记">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog.nsah.top/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/1.png">
+<meta property="og:image" content="https://blog.nsah.top/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/2.png">
+<meta property="og:image" content="https://blog.nsah.top/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/3.png">
+<meta property="og:image" content="https://blog.nsah.top/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/4.png">
+<meta property="og:image" content="https://blog.nsah.top/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/5.png">
+<meta property="og:image" content="https://blog.nsah.top/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/6.png">
+<meta property="article:published_time" content="2020-09-08T08:19:47.772Z">
+<meta property="article:modified_time" content="2020-09-08T09:07:06.396Z">
+<meta property="article:author" content="Snow-NSAH">
+<meta property="article:tag" content="CTF-WEB">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog.nsah.top/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/1.png">
+
+<link rel="canonical" href="https://blog.nsah.top/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>flag.php | Snowの博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Snowの博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">渗透小白</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">1</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">1</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">33</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://blog.nsah.top/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/nsah.gif">
+      <meta itemprop="name" content="Snow-NSAH">
+      <meta itemprop="description" content="精益求精, 永无止境">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Snowの博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          flag.php
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020/09/08 16:19:47 / 修改时间：17:07:06" itemprop="dateCreated datePublished" datetime="2020-09-08T16:19:47+08:00">2020/09/08</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CTF-Bugku-%E6%97%A7%E7%89%88-WEB/" itemprop="url" rel="index"><span itemprop="name">CTF-Bugku(旧版)-WEB</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="开卷看题"><a href="#开卷看题" class="headerlink" title="开卷看题"></a>开卷看题</h2><img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/1.png" class="">
+
+<p>题干很重要，先记一记</p>
+<a id="more"></a>
+
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/2.png" class="">
+
+<p>经典的登录框</p>
+<h2 id="寻找线索"><a href="#寻找线索" class="headerlink" title="寻找线索"></a>寻找线索</h2><p>根据标题和URL路径提示，习惯性的访问了一下flag.php发现存在且只有一行，很可能是flag变量的定义</p>
+<p>为求谨慎，扫描了一下目录，发现只有index和flag两个页面</p>
+<p>看看题干，首先说点了login为什么没反应，看看源码呗</p>
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/3.png" class="">
+
+<p>你个糟老头子坏得很，这要是有反应就见鬼了</p>
+<p>看来这题要么就是爆破要么就是注入，为了方便起见我们先用BP自动修改HTML</p>
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/4.png" class="">
+
+<p>这样再刷新就可以直接提交了</p>
+<p>接下来就是尝试时间了，爆破注入全都不好使，看来应该不是从这里入手</p>
+<h2 id="陷入迷雾"><a href="#陷入迷雾" class="headerlink" title="陷入迷雾"></a>陷入迷雾</h2><p>题干的第一句话已经解决了（虽然没什么用）</p>
+<p>看来破案的重点就是第二个提示：hint，这个单词究竟有什么深邃的含义呢？</p>
+<p>就在万般无奈的时候，看了一眼桌上的A4纸，突然想到了一个单词：margin</p>
+<p>记得以前的题目中margin是作为参数的，那么这次会不会也是</p>
+<p>果然提交hint参数</p>
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/5.png" class="">
+
+<p>这hint可真够劲，GOOD，GOOD，six six six</p>
+<h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">error_reporting(<span class="number">0</span>);</span><br><span class="line"><span class="keyword">include_once</span>(<span class="string">&quot;flag.php&quot;</span>);</span><br><span class="line">$cookie = $_COOKIE[<span class="string">&#x27;ISecer&#x27;</span>];</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>($_GET[<span class="string">&#x27;hint&#x27;</span>])) &#123;</span><br><span class="line">    show_source(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125; <span class="keyword">elseif</span> (unserialize($cookie) === <span class="string">&quot;$KEY&quot;</span>) &#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&quot;$flag&quot;</span>;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">?&gt;</span></span><br><span class="line"></span><br><span class="line">    &lt;html&gt;</span><br><span class="line">    &lt;head&gt;</span><br><span class="line">        &lt;meta http-equiv=<span class="string">&quot;Content-Type&quot;</span> content=<span class="string">&quot;text/html; charset=UTF-8&quot;</span>&gt;</span><br><span class="line">        &lt;title&gt;Login&lt;/title&gt;</span><br><span class="line">        &lt;link rel=<span class="string">&quot;stylesheet&quot;</span> href=<span class="string">&quot;admin.css&quot;</span> type=<span class="string">&quot;text/css&quot;</span>&gt;</span><br><span class="line">    &lt;/head&gt;</span><br><span class="line">    &lt;body&gt;</span><br><span class="line">    &lt;br&gt;</span><br><span class="line">    &lt;div class=&quot;container&quot; align=&quot;center&quot;&gt;</span><br><span class="line">        &lt;form method=<span class="string">&quot;POST&quot;</span> action=<span class="string">&quot;#&quot;</span>&gt;</span><br><span class="line">            &lt;p&gt;&lt;input name=<span class="string">&quot;user&quot;</span> type=<span class="string">&quot;text&quot;</span> placeholder=<span class="string">&quot;Username&quot;</span>&gt;&lt;/p&gt;</span><br><span class="line">            &lt;p&gt;&lt;input name=<span class="string">&quot;password&quot;</span> type=<span class="string">&quot;password&quot;</span> placeholder=<span class="string">&quot;Password&quot;</span>&gt;&lt;/p&gt;</span><br><span class="line">            &lt;p&gt;&lt;input value=<span class="string">&quot;Login&quot;</span> type=<span class="string">&quot;submit&quot;</span>/&gt;&lt;/p&gt;</span><br><span class="line">        &lt;/form&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">    &lt;/body&gt;</span><br><span class="line">    &lt;/html&gt;</span><br><span class="line"></span><br><span class="line">    <span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">$KEY = <span class="string">&#x27;ISecer:www.isecer.com&#x27;</span>;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>总结一下：当cookie参数ISecer反序列化后完全等于变量KEY时输出flag</p>
+<p>代码不难但是陷阱到不少，主要有二：</p>
+<ol>
+<li>看下格式化之后的代码，你发现了什么？</li>
+<li>KEY变量被赋值的位置</li>
+<li>老规矩，看不懂私信我，包教包会</li>
+</ol>
+<h2 id="羽化登仙"><a href="#羽化登仙" class="headerlink" title="羽化登仙"></a>羽化登仙</h2><p>填了坑，接下来就是舒服的获取flag环节了</p>
+<p>Note：写到这里突然发现前面写的都凭空消失了，WTFK????????? 还好有Git，还原了文件内容，GIT牛脾</p>
+<p>小插曲不要紧，flag才重要，上图</p>
+<img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/6.png" class="">
+
+<p>YES，收工</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>GIT真香</p>
+<p>说错了，是具备良好的基础很重要</p>
+<p>其实上一句也不重要，最重要的是不要被作者忽悠</p>
+<p>其实也不对，相信自己的判断吧</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Snow-NSAH
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://blog.nsah.top/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/" title="flag.php">https://blog.nsah.top/2020/09/08/CTF/WEB/Bugku(旧版)/flag_php/</a>
+  </li>
+    <li class="post-copyright-license">
+    <strong>反馈建议：</strong>
+    限于作者水平, 博文肯定有不足甚至错误之处, 欢迎发送邮件提供您的宝贵建议
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/CTF-WEB/" rel="tag"># CTF-WEB</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E5%A4%9A%E6%AC%A1/" rel="prev" title="多次">
+      <i class="fa fa-chevron-left"></i> 多次
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%8D%B7%E7%9C%8B%E9%A2%98"><span class="nav-number">1.</span> <span class="nav-text">开卷看题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%BB%E6%89%BE%E7%BA%BF%E7%B4%A2"><span class="nav-number">2.</span> <span class="nav-text">寻找线索</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%B7%E5%85%A5%E8%BF%B7%E9%9B%BE"><span class="nav-number">3.</span> <span class="nav-text">陷入迷雾</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90"><span class="nav-number">4.</span> <span class="nav-text">代码分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BE%BD%E5%8C%96%E7%99%BB%E4%BB%99"><span class="nav-number">5.</span> <span class="nav-text">羽化登仙</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8E%E8%AE%B0"><span class="nav-number">6.</span> <span class="nav-text">后记</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Snow-NSAH"
+      src="/images/nsah.gif">
+  <p class="site-author-name" itemprop="name">Snow-NSAH</p>
+  <div class="site-description" itemprop="description">精益求精, 永无止境</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="mailto:2562950632@qq.com" title="E-Mail → mailto:2562950632@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=2562950632" title="QQ → tencent:&#x2F;&#x2F;AddContact&#x2F;?fromId&#x3D;45&amp;fromSubId&#x3D;1&amp;subcmd&#x3D;all&amp;uin&#x3D;2562950632" rel="noopener" target="_blank"><i class="fab fa-qq fa-fw"></i>QQ</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://nsah.top/" title="https:&#x2F;&#x2F;nsah.top" rel="noopener" target="_blank">主站(开发中)</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://bbs.nsah.top/" title="https:&#x2F;&#x2F;bbs.nsah.top" rel="noopener" target="_blank">论坛(建设中)</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://sunian.top/" title="https:&#x2F;&#x2F;sunian.top" rel="noopener" target="_blank">素念博客</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://zer0-knows.github.io/" title="https:&#x2F;&#x2F;zer0-knows.github.io" rel="noopener" target="_blank">零识博客</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Snow-NSAH</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+  <!-- 页面点击小红心 -->
+  <script src="/js/clicklove.js"></script>
+</body>
+</html>
