@@ -1331,13 +1331,13 @@
 <p>看来这题要么就是爆破要么就是注入，为了方便起见我们先用BP自动修改HTML</p>
 <img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/4.png" class="">
 
-<p>这样再刷新就可以直接提交了</p>
+<p>搞定之后BP就会自动替换内容，方便操作</p>
 <p>接下来就是尝试时间了，爆破注入全都不好使，看来应该不是从这里入手</p>
 <h2 id="陷入迷雾"><a href="#陷入迷雾" class="headerlink" title="陷入迷雾"></a>陷入迷雾</h2><p>题干的第一句话已经解决了（虽然没什么用）</p>
 <p>看来破案的重点就是第二个提示：hint，这个单词究竟有什么深邃的含义呢？</p>
 <p>就在万般无奈的时候，看了一眼桌上的A4纸，突然想到了一个单词：margin</p>
 <p>记得以前的题目中margin是作为参数的，那么这次会不会也是</p>
-<p>果然提交hint参数</p>
+<p>尝试提交hint参数</p>
 <img src="/2020/09/08/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/flag_php/5.png" class="">
 
 <p>这hint可真够劲，GOOD，GOOD，six six six</p>
@@ -1360,6 +1360,197 @@
 <p>说错了，是具备良好的基础很重要</p>
 <p>其实上一句也不重要，最重要的是不要被作者忽悠</p>
 <p>其实也不对，相信自己的判断吧</p>
+]]></content>
+      <categories>
+        <category>CTF-Bugku(旧版)-WEB</category>
+      </categories>
+      <tags>
+        <tag>CTF-WEB</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SQL注入2</title>
+    <url>/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/</url>
+    <content><![CDATA[<h2 id="开卷看题"><a href="#开卷看题" class="headerlink" title="开卷看题"></a>开卷看题</h2><img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/1.png" class="">
+
+<p>开幕雷击，打击我的自信心，BUT我是你能打击的人ma？</p>
+<a id="more"></a>
+
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/2.png" class="">
+
+<p>又是一个登录框，肯定不简单</p>
+<h2 id="寻找线索"><a href="#寻找线索" class="headerlink" title="寻找线索"></a>寻找线索</h2><p>CTF三剑客：看源码、看响应、扫目录</p>
+<p>源码和响应都没什么内容，扫扫目录</p>
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/3.png" class="">
+
+<p>意外收获还真不少，站点存在DS_Store文件和一个flag文件</p>
+<h2 id="追寻真理"><a href="#追寻真理" class="headerlink" title="追寻真理"></a>追寻真理</h2><p>先访问flag看看内容</p>
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/4.png" class="">
+
+<p>我靠，直接拿下？？？</p>
+<h2 id="不甘平凡"><a href="#不甘平凡" class="headerlink" title="不甘平凡"></a>不甘平凡</h2><p>虽然说flag获得的出人意料，但是个人猜测是作者不小心搞错了文件名字导致flag文件可以直接下载</p>
+<p>所以，现在开始按照正常套路尝试一下</p>
+<p>既然是登录框，有可能是暴破或者SQLI，不过从分值上看，暴破的可能性比较低，着重看看SQLI，预计有WAF，</p>
+<p>测试两个用户和密码：admin 123 和 123 123</p>
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/5.png" class="">
+
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/6.png" class="">
+
+<p>从提示信息看，程序先判断用户名是否正确然后再判断密码是否正确，顺道看一眼源码</p>
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/7.png" class="">
+
+<p>结合以上信息，猜测后台处理逻辑为</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F; WAF过滤参数</span><br><span class="line"></span><br><span class="line">SELECT &#96;passwd&#96; FROM &#96;users&#96; WHERE &#96;uname&#96;&#x3D;input_name;</span><br><span class="line"></span><br><span class="line">if (input_passwd &#x3D;&#x3D; passwd) &#123;</span><br><span class="line">	&#x2F;&#x2F; 登录成功</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>先测试uname字断，fuzz（模糊测试）一波，话不多说直接上图</p>
+<p>说明：illegal匹配是因为测试了一下发现WAF拦截会提示illegal character</p>
+<p>字典：<a href="https://blog.csdn.net/qq_45793883/article/details/104728901" alt="" target="_blank">传送门</a>（随便找的一个）</p>
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/8.png" class="">
+
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/9.png" class="">
+
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/10.png" class="">
+
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/11.png" class="">
+
+<p>看着结果，总感觉不对劲。。。</p>
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/1.png" class="">
+
+<p>这特么还真是提示，给的都是合法的。。。。思维定式害死人</p>
+<h2 id="探索真相"><a href="#探索真相" class="headerlink" title="探索真相"></a>探索真相</h2><p>合法字符：!、!=、=、+、-、^、%</p>
+<p>没有逗号，UNION查询凉凉</p>
+<p>可以用异或查询</p>
+]]></content>
+      <categories>
+        <category>CTF-Bugku(旧版)-WEB</category>
+      </categories>
+      <tags>
+        <tag>CTF-WEB</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Trim的日记本</title>
+    <url>/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/Trim%E7%9A%84%E6%97%A5%E8%AE%B0%E6%9C%AC/</url>
+    <content><![CDATA[<h2 id="开卷看题"><a href="#开卷看题" class="headerlink" title="开卷看题"></a>开卷看题</h2><img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/Trim%E7%9A%84%E6%97%A5%E8%AE%B0%E6%9C%AC/0.png" class="">
+
+<p>作者告诉我们不要一次就放弃，看来又是一个攻坚战</p>
+<a id="more"></a>
+
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/Trim%E7%9A%84%E6%97%A5%E8%AE%B0%E6%9C%AC/1.png" class="">
+
+<p>经典的登录页面，不过这个 mysql connect error ! 看着很刺眼啊，难不成题目BOOM了？</p>
+<h2 id="开始尝试"><a href="#开始尝试" class="headerlink" title="开始尝试"></a>开始尝试</h2><p>&#12288;&#12288;本题有三个页面，登录、注册和重置密码，挨个尝试一遍发现都没什么可搞的，结合刺眼的消息，看来不会是暴破和注入了，一时之间没什么思路</p>
+<p>CTF三剑客：看源码，看响应，扫目录</p>
+<p>源码、响应都没什么特别的，扫扫目录</p>
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/Trim%E7%9A%84%E6%97%A5%E8%AE%B0%E6%9C%AC/2.jpg" class="">
+
+<p>也没什么特别的，更迷茫了，不过想到作者的提示，还是顺手换了一个字典扫一扫</p>
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/Trim%E7%9A%84%E6%97%A5%E8%AE%B0%E6%9C%AC/3.jpg" class="">
+
+<p>一扫吓一跳，多出个show.php，访问一下</p>
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/Trim%E7%9A%84%E6%97%A5%E8%AE%B0%E6%9C%AC/4.png" class="">
+
+<p>多搞几个字典果然有用，完美落幕</p>
+<h2 id="反思"><a href="#反思" class="headerlink" title="反思"></a>反思</h2><p>凡事都要多多尝试</p>
+]]></content>
+      <categories>
+        <category>CTF-Bugku(旧版)-WEB</category>
+      </categories>
+      <tags>
+        <tag>CTF-WEB</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>江湖魔头</title>
+    <url>/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/</url>
+    <content><![CDATA[<h2 id="开卷看题"><a href="#开卷看题" class="headerlink" title="开卷看题"></a>开卷看题</h2><img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/1.png" class="">
+
+<p>浓重的网游风</p>
+<a id="more"></a>
+
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/2.png" class="">
+
+<p>刷新几次都差不多，直接干</p>
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/3.png" class="">
+
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/4.png" class="">
+
+<p>emmm…….从属性上看，想正常通关可能要1W年，怎么办呢？</p>
+<p>作为一名DNF老玩家，深知装备不好的痛，所以解决之路…..肯定是开挂啊</p>
+<h2 id="外挂研发之路"><a href="#外挂研发之路" class="headerlink" title="外挂研发之路"></a>外挂研发之路</h2><h3 id="第一步：找可修改的敏感资源"><a href="#第一步：找可修改的敏感资源" class="headerlink" title="第一步：找可修改的敏感资源"></a>第一步：找可修改的敏感资源</h3><img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/5.png" class="">
+
+<p>看来看去，只有COOKIE值很可疑，不过加密了</p>
+<h3 id="第二步：解密敏感资源"><a href="#第二步：解密敏感资源" class="headerlink" title="第二步：解密敏感资源"></a>第二步：解密敏感资源</h3><p>首先尝试直接URL解码-&gt;BASE64解码</p>
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/6.png" class="">
+
+<p>不出所料，失败了，不过既然是CTF，加密函数多少都会有点提示，康康源码</p>
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/7.png" class="">
+
+<h3 id="第三步：源码审计"><a href="#第三步：源码审计" class="headerlink" title="第三步：源码审计"></a>第三步：源码审计</h3><img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/8.png" class="">
+
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/9.png" class="">
+
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/10.png" class="">
+
+<p>md5.js和base64.js应该是引用公开的源码，script.js看着就问题很大而且做了混淆，BUT这能难得住我吗</p>
+<p>这个混淆的名字我忘了，但是怎么处理记得很清楚，把eval删除其余的直接扔进console</p>
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/11.png" class="">
+
+<p>光速获取源码，分析一下</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getCookie</span>(<span class="params">cname</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> name = cname + <span class="string">&quot;=&quot;</span>;</span><br><span class="line">    <span class="keyword">var</span> ca = <span class="built_in">document</span>.cookie.split(<span class="string">&#x27;;&#x27;</span>);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; ca.length; i++) &#123;</span><br><span class="line">        <span class="keyword">var</span> c = ca[i].trim();</span><br><span class="line">        <span class="keyword">if</span> (c.indexOf(name) == <span class="number">0</span>) <span class="keyword">return</span> c.substring(name.length, c.length)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">decode_create</span>(<span class="params">temp</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> base = <span class="keyword">new</span> Base64();</span><br><span class="line">    <span class="keyword">var</span> result = base.decode(temp);</span><br><span class="line">    <span class="keyword">var</span> result3 = <span class="string">&quot;&quot;</span>;</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; result.length; i++) &#123;</span><br><span class="line">        <span class="keyword">var</span> num = result[i].charCodeAt();</span><br><span class="line">        num = num ^ i;</span><br><span class="line">        num = num - ((i % <span class="number">10</span>) + <span class="number">2</span>);</span><br><span class="line">        result3 += <span class="built_in">String</span>.fromCharCode(num)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result3</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">ertqwe</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> temp_name = <span class="string">&quot;user&quot;</span>;</span><br><span class="line">    <span class="keyword">var</span> temp = getCookie(temp_name);</span><br><span class="line">    temp = <span class="built_in">decodeURIComponent</span>(temp);</span><br><span class="line">    <span class="keyword">var</span> mingwen = decode_create(temp);</span><br><span class="line">    <span class="keyword">var</span> ca = mingwen.split(<span class="string">&#x27;;&#x27;</span>);</span><br><span class="line">    <span class="keyword">var</span> key = <span class="string">&quot;&quot;</span>;</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; ca.length; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="number">-1</span> &lt; ca[i].indexOf(<span class="string">&quot;flag&quot;</span>)) &#123;</span><br><span class="line">            key = ca[i + <span class="number">1</span>].split(<span class="string">&quot;:&quot;</span>)[<span class="number">2</span>]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    key = key.replace(<span class="string">&#x27;&quot;&#x27;</span>, <span class="string">&quot;&quot;</span>).replace(<span class="string">&#x27;&quot;&#x27;</span>, <span class="string">&quot;&quot;</span>);</span><br><span class="line">    <span class="built_in">document</span>.write(<span class="string">&#x27;&lt;img id=&quot;attack-1&quot; src=&quot;image/1-1.jpg&quot;&gt;&#x27;</span>);</span><br><span class="line">    <span class="built_in">setTimeout</span>(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="built_in">document</span>.getElementById(<span class="string">&quot;attack-1&quot;</span>).src = <span class="string">&quot;image/1-2.jpg&quot;</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="number">1000</span>);</span><br><span class="line">    <span class="built_in">setTimeout</span>(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="built_in">document</span>.getElementById(<span class="string">&quot;attack-1&quot;</span>).src = <span class="string">&quot;image/1-3.jpg&quot;</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="number">2000</span>);</span><br><span class="line">    <span class="built_in">setTimeout</span>(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="built_in">document</span>.getElementById(<span class="string">&quot;attack-1&quot;</span>).src = <span class="string">&quot;image/1-4.jpg&quot;</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="number">3000</span>);</span><br><span class="line">    <span class="built_in">setTimeout</span>(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="built_in">document</span>.getElementById(<span class="string">&quot;attack-1&quot;</span>).src = <span class="string">&quot;image/6.png&quot;</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="number">4000</span>);</span><br><span class="line">    <span class="built_in">setTimeout</span>(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            alert(<span class="string">&quot;你使用如来神掌打败了蒙老魔，但不知道是真身还是假身，提交试一下吧!flag&#123;&quot;</span> + md5(key) + <span class="string">&quot;&#125;&quot;</span>)</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="number">5000</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>意思就是执行ertqwe函数之后可以获取flag，不过是MD5形式的，所以现在的任务就是找到原始key</p>
+<p>虽然觉得不会这么容易，但是不管怎么样先试试，打开console执行ertqwe函数</p>
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/12.png" class="">
+
+<p>whatfk？？？？简直就是逗我，看来这题没这么简单，继续审计源码</p>
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/13.png" class="">
+
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/14.png" class="">
+
+<p>看来想获取key还是要先打败魔头…..</p>
+<h3 id="第四步：篡改游戏数据"><a href="#第四步：篡改游戏数据" class="headerlink" title="第四步：篡改游戏数据"></a>第四步：篡改游戏数据</h3><p>数组还是不够直观，反序列化一下</p>
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/15.png" class="">
+
+<p>人物属性都在其中，只要修改数值重新加密发送打败魔头应该就能获取key了</p>
+<p>大致流程：提取cookie–&gt;解密–&gt;修改数据–&gt;加密–&gt;发送至服务器–&gt;对返回的数据再次解密–&gt;提取key</p>
+<p>解密搞定了，剩下的就是加密了，加密应该是解密的反操作，分析解密函数</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">decode_create</span>(<span class="params">temp</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> base = <span class="keyword">new</span> Base64(); <span class="comment">// 创建Base64对象</span></span><br><span class="line">    <span class="keyword">var</span> result = base.decode(temp); <span class="comment">// 对temp变量b64解码</span></span><br><span class="line">    <span class="keyword">var</span> result3 = <span class="string">&quot;&quot;</span>;</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; result.length; i++) &#123;</span><br><span class="line">        <span class="keyword">var</span> num = result[i].charCodeAt(); <span class="comment">// 把字符转换为Unicode编码</span></span><br><span class="line">        num = num ^ i; <span class="comment">// Unicode编码和下标异或</span></span><br><span class="line">        num = num - ((i % <span class="number">10</span>) + <span class="number">2</span>); <span class="comment">// 数值变换</span></span><br><span class="line">        result3 += <span class="built_in">String</span>.fromCharCode(num) <span class="comment">// 将Unicode编码转换为字符并追加至结果</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result3</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>根据解密函数写出加密函数</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">encode_create</span>(<span class="params">temp</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> result3 = <span class="string">&quot;&quot;</span>;</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; temp.length; i++) &#123;</span><br><span class="line">        <span class="keyword">var</span> num = temp.charCodeAt(i);</span><br><span class="line">        num = num + ((i % <span class="number">10</span>) + <span class="number">2</span>);</span><br><span class="line">        num = num ^ i;</span><br><span class="line">        result3 += <span class="built_in">String</span>.fromCharCode(num);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">var</span> base = <span class="keyword">new</span> Base64();</span><br><span class="line">    <span class="keyword">var</span> result1 = base.encode(result3);</span><br><span class="line">    <span class="keyword">return</span> result1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此外，贴出辅助函数</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">encrypt</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> str = <span class="string">&#x27;O:5:&quot;human&quot;:10:&#123;s:8:&quot;xueliang&quot;;i:537;s:5:&quot;neili&quot;;i:618;s:5:&quot;lidao&quot;;i:59;s:6:&quot;dingli&quot;;i:77;s:7:&quot;waigong&quot;;i:0;s:7:&quot;neigong&quot;;i:0;s:7:&quot;jingyan&quot;;i:0;s:6:&quot;yelian&quot;;i:0;s:5:&quot;money&quot;;i:200000;s:4:&quot;flag&quot;;s:1:&quot;0&quot;;&#125;&#x27;</span>;</span><br><span class="line">    <span class="keyword">var</span> miwen = encode_create(str);</span><br><span class="line">    <span class="keyword">var</span> encrypt = <span class="built_in">encodeURIComponent</span>(miwen);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">console</span>.log(encrypt);</span><br><span class="line">    <span class="built_in">document</span>.cookie = <span class="string">&quot;user=&quot;</span> + encrypt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们缺的其实就是一个字：钱（本次修改为20W元宝）</p>
+<p>在console中执行函数，修改客户端数据</p>
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/16.png" class="">
+
+<p>点击属性查看是否修改成功</p>
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/17.png" class="">
+
+<p>这……肯定是出问题了，重新翻看源码</p>
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/18.png" class="">
+
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/19.png" class="">
+
+<p>编码解码不对称，果然有问题（不愧是我），注释掉编码中指定的行</p>
+<p>在线修改源码很麻烦，所以个人把源码copy到本地修改后生成加密的cookie</p>
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/20.png" class="">
+
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/21.png" class="">
+
+<p>修改数据后刷新一下看看效果</p>
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/22.png" class="">
+
+<p>YES，摇身一变成土豪，接下来就是愉快的买买买了，最后一掌打死老恶魔</p>
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/23.png" class="">
+
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>通过花钱可以知道各个属性的最大值，那么。。。如果超出范围呢，比如都是经典的8个9</p>
+<img src="/2020/09/27/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/%E6%B1%9F%E6%B9%96%E9%AD%94%E5%A4%B4/24.png" class="">
+
+<p>还是别太贪了</p>
 ]]></content>
       <categories>
         <category>CTF-Bugku(旧版)-WEB</category>
