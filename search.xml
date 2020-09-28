@@ -1383,27 +1383,45 @@
 <p>源码和响应都没什么内容，扫扫目录</p>
 <img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/3.png" class="">
 
-<p>意外收获还真不少，站点存在DS_Store文件和一个flag文件</p>
-<h2 id="追寻真理"><a href="#追寻真理" class="headerlink" title="追寻真理"></a>追寻真理</h2><p>先访问flag看看内容</p>
+<p>意外收获还真不少，站点存在.DS_Store文件和一个flag文件</p>
+<h2 id="追寻真理"><a href="#追寻真理" class="headerlink" title="追寻真理"></a>追寻真理</h2><p>既然存在.DS_Store了，你懂得（老规矩：不想折腾环境直接上kali）</p>
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/B1.png" class="">
+
+<p>与扫描目录的结果一致</p>
+<p>访问flag文件康康</p>
 <img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/4.png" class="">
 
 <p>我靠，直接拿下？？？</p>
-<h2 id="不甘平凡"><a href="#不甘平凡" class="headerlink" title="不甘平凡"></a>不甘平凡</h2><p>虽然说flag获得的出人意料，但是个人猜测是作者不小心搞错了文件名字导致flag文件可以直接下载</p>
-<p>所以，现在开始按照正常套路尝试一下</p>
-<p>既然是登录框，有可能是暴破或者SQLI，不过从分值上看，暴破的可能性比较低，着重看看SQLI，预计有WAF，</p>
-<p>测试两个用户和密码：admin 123 和 123 123</p>
+<h2 id="不甘平凡"><a href="#不甘平凡" class="headerlink" title="不甘平凡"></a>不甘平凡</h2><p>&emsp;&emsp;虽然说flag获得的出人意料，但是个人猜测是作者不小心搞错了文件名字导致flag文件可以直接下载（或者作者就是想告诉我们一个道理：通往罗马的路不止一条）接下来按照正常套路尝试一下</p>
+<p>既然是登录框，很有可能是暴破或者SQLI</p>
+<h2 id="尝试暴破"><a href="#尝试暴破" class="headerlink" title="尝试暴破"></a>尝试暴破</h2><p>随手测试两个用户：admin 123 和 123 123</p>
 <img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/5.png" class="">
 
 <img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/6.png" class="">
 
-<p>从提示信息看，程序先判断用户名是否正确然后再判断密码是否正确，顺道看一眼源码</p>
+<p>根据提示，可以确定存在admin账户，所以接下来只需暴破admin的密码即可</p>
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/A1.png" class="">
+
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/A2.png" class="">
+
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/A3.png" class="">
+
+<p>&emsp;&emsp;暴破发现大量密码都可以登录至后台，这显然不正常，推测后台的处理逻辑为：如果当前会话已登录则直接跳转至admin首页不再进行二次验证</p>
+<p>&emsp;&emsp;如果推测正确，那么第一个验证成功的应该就是正确的密码，查看一下数据包发现序号是从小至大的，由此可以判定admin123就是正确的密码，尝试登录</p>
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/A4.png" class="">
+
+<p>成功登录，此时我们发现系统提示我们输入ls，那就输入喽</p>
+<img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/A5.png" class="">
+
+<p>拿到flag(好像随便输入点什么就可以得到flag)</p>
+<h2 id="尝试SQL注入"><a href="#尝试SQL注入" class="headerlink" title="尝试SQL注入"></a>尝试SQL注入</h2><p>&emsp;&emsp;从系统的提示信息推断，后台先判断用户名是否正确然后再判断密码是否正确，结合前端源码（一般前端的name属性值和后台的SQL字段基本一致）</p>
 <img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/7.png" class="">
 
 <p>结合以上信息，猜测后台处理逻辑为</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F; WAF过滤参数</span><br><span class="line"></span><br><span class="line">SELECT &#96;passwd&#96; FROM &#96;users&#96; WHERE &#96;uname&#96;&#x3D;input_name;</span><br><span class="line"></span><br><span class="line">if (input_passwd &#x3D;&#x3D; passwd) &#123;</span><br><span class="line">	&#x2F;&#x2F; 登录成功</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>先测试uname字断，fuzz（模糊测试）一波，话不多说直接上图</p>
-<p>说明：illegal匹配是因为测试了一下发现WAF拦截会提示illegal character</p>
+<p>说明：增加illegal匹配是因为WAF拦截时会提示illegal character</p>
 <p>字典：<a href="https://blog.csdn.net/qq_45793883/article/details/104728901" alt="" target="_blank">传送门</a>（随便找的一个）</p>
 <img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/8.png" class="">
 
@@ -1417,9 +1435,15 @@
 <img src="/2020/09/07/CTF/WEB/Bugku(%E6%97%A7%E7%89%88)/sql%E6%B3%A8%E5%85%A52/1.png" class="">
 
 <p>这特么还真是提示，给的都是合法的。。。。思维定式害死人</p>
-<h2 id="探索真相"><a href="#探索真相" class="headerlink" title="探索真相"></a>探索真相</h2><p>合法字符：!、!=、=、+、-、^、%</p>
+<h2 id="艰难的攻坚战"><a href="#艰难的攻坚战" class="headerlink" title="艰难的攻坚战"></a>艰难的攻坚战</h2><p>合法字符：!、!=、=、+、-、^、%</p>
 <p>没有逗号，UNION查询凉凉</p>
 <p>可以用异或查询</p>
+<p>函数记载：</p>
+<ul>
+<li>ASCII()函数返回字符的ASCII码值</li>
+<li>MID() 函数用于从文本字段中提取字符</li>
+<li>REVERSE函数：反转字符串</li>
+</ul>
 ]]></content>
       <categories>
         <category>CTF-Bugku(旧版)-WEB</category>
@@ -1552,6 +1576,30 @@
 ]]></content>
       <categories>
         <category>CTF-Bugku(旧版)-WEB</category>
+      </categories>
+      <tags>
+        <tag>CTF-WEB</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>web26</title>
+    <url>/2020/09/28/CTF/WEB/CTF%E8%AE%BA%E5%89%91%E5%9C%BA/web26/</url>
+    <content><![CDATA[<h2 id="开卷看题"><a href="#开卷看题" class="headerlink" title="开卷看题"></a>开卷看题</h2><img src="/2020/09/28/CTF/WEB/CTF%E8%AE%BA%E5%89%91%E5%9C%BA/web26/1.png" class="">
+
+<p>源码审计题</p>
+<a id="more"></a>
+
+<h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$num=$_GET[<span class="string">&#x27;num&#x27;</span>];</span><br><span class="line">$str=$_GET[<span class="string">&#x27;str&#x27;</span>];</span><br><span class="line">show_source(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>($num) &amp;&amp; <span class="keyword">isset</span>($str)) &#123;</span><br><span class="line">    <span class="comment">// 正则匹配str参数是否包含数字</span></span><br><span class="line">    <span class="keyword">if</span> (preg_match(<span class="string">&#x27;/\d+/sD&#x27;</span>,$str)) &#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">&quot;vagetable hhhh&quot;</span>;</span><br><span class="line">        <span class="keyword">exit</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 如果is_numisic校验两个参数均为true则输出flag</span></span><br><span class="line">    $result=is_numeric($num) <span class="keyword">and</span> is_numeric($str);</span><br><span class="line">    <span class="keyword">if</span> ($result) &#123;</span><br><span class="line">        <span class="keyword">include</span> <span class="string">&quot;flag.php&quot;</span>;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">&quot;$flag&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">&quot;vagetablessssss&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>总结：如果str不包含数字但是is_numeric函数返回true则输出flag</p>
+<p>不知你是否觉得这一幕似曾相识？</p>
+<h2 id="直指flag"><a href="#直指flag" class="headerlink" title="直指flag"></a>直指flag</h2><p>构造payload：num=1&amp;str=a</p>
+<img src="/2020/09/28/CTF/WEB/CTF%E8%AE%BA%E5%89%91%E5%9C%BA/web26/2.png" class="">
+
+<p>拿下，睡觉去</p>
+]]></content>
+      <categories>
+        <category>CTF-CTF论剑场(Bugku新版)-WEB</category>
       </categories>
       <tags>
         <tag>CTF-WEB</tag>
